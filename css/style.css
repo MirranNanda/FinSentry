@@ -1,0 +1,208 @@
+/* FinSentry design tokens — validated palette (see dataviz skill / palette.md).
+   Light values on :root; dark values under both the OS media query and the
+   manual [data-theme="dark"] toggle so either can win. */
+
+:root {
+  color-scheme: light;
+
+  --surface-0: #f9f9f7;   /* page plane */
+  --surface-1: #fcfcfb;   /* card surface */
+  --surface-2: #ffffff;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --gridline: #e1e0d9;
+  --border: rgba(11, 11, 11, 0.10);
+  --baseline: #c3c2b7;
+
+  --series-blue: #2a78d6;
+  --series-orange: #eb6834;
+  --series-aqua: #1baf7a;
+  --series-violet: #4a3aa7;
+
+  --status-good: #0ca30c;
+  --status-warning: #fab219;
+  --status-serious: #ec835a;
+  --status-critical: #d03b3b;
+
+  --status-good-tint: rgba(12, 163, 12, 0.12);
+  --status-warning-tint: rgba(250, 178, 25, 0.16);
+  --status-serious-tint: rgba(236, 131, 90, 0.16);
+  --status-critical-tint: rgba(208, 59, 59, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-0: #0d0d0d;
+    --surface-1: #1a1a19;
+    --surface-2: #202020;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --gridline: #2c2c2a;
+    --border: rgba(255, 255, 255, 0.10);
+    --baseline: #383835;
+
+    --series-blue: #3987e5;
+    --series-orange: #d95926;
+    --series-aqua: #199e70;
+    --series-violet: #9085e9;
+
+    --status-good: #0ca30c;
+    --status-warning: #fab219;
+    --status-serious: #ec835a;
+    --status-critical: #e66767;
+
+    --status-good-tint: rgba(12, 163, 12, 0.18);
+    --status-warning-tint: rgba(250, 178, 25, 0.18);
+    --status-serious-tint: rgba(236, 131, 90, 0.18);
+    --status-critical-tint: rgba(230, 103, 103, 0.18);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0: #0d0d0d;
+  --surface-1: #1a1a19;
+  --surface-2: #202020;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --gridline: #2c2c2a;
+  --border: rgba(255, 255, 255, 0.10);
+  --baseline: #383835;
+
+  --series-blue: #3987e5;
+  --series-orange: #d95926;
+  --series-aqua: #199e70;
+  --series-violet: #9085e9;
+
+  --status-good: #0ca30c;
+  --status-warning: #fab219;
+  --status-serious: #ec835a;
+  --status-critical: #e66767;
+
+  --status-good-tint: rgba(12, 163, 12, 0.18);
+  --status-warning-tint: rgba(250, 178, 25, 0.18);
+  --status-serious-tint: rgba(236, 131, 90, 0.18);
+  --status-critical-tint: rgba(230, 103, 103, 0.18);
+}
+
+body {
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font-variant-numeric: proportional-nums;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.stat-tile-value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* ---- Badges -------------------------------------------------------- */
+/* Text always stays in neutral ink; color is a tint + icon, never text-on-fill,
+   so contrast is never at the mercy of the status hue. */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: var(--text-primary);
+  border: 1px solid transparent;
+}
+
+.badge-good { background: var(--status-good-tint); color: var(--status-good); border-color: var(--status-good); }
+.badge-warning { background: var(--status-warning-tint); color: #8a6200; border-color: var(--status-warning); }
+.badge-serious { background: var(--status-serious-tint); color: #9c3e1c; border-color: var(--status-serious); }
+.badge-critical { background: var(--status-critical-tint); color: var(--status-critical); border-color: var(--status-critical); }
+.badge-neutral { background: var(--surface-2); color: var(--text-secondary); border-color: var(--border); }
+
+.badge-good-solid { background: var(--status-good); color: #ffffff; }
+.badge-critical-solid { background: var(--status-critical); color: #ffffff; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .badge-warning { color: var(--status-warning); }
+  :root:not([data-theme="light"]) .badge-serious { color: var(--status-serious); }
+}
+:root[data-theme="dark"] .badge-warning { color: var(--status-warning); }
+:root[data-theme="dark"] .badge-serious { color: var(--status-serious); }
+
+/* ---- Nav active link ------------------------------------------------ */
+
+.nav-link {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.nav-link:hover {
+  color: var(--text-primary);
+}
+.nav-link.active {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ---- Risk distribution bar (dashboard) ------------------------------ */
+
+.risk-bar-row {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr 3rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.risk-bar-track {
+  height: 0.6rem;
+  background: var(--gridline);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.risk-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+/* ---- Misc ------------------------------------------------------------ */
+
+.hairline {
+  border-color: var(--gridline);
+}
+
+table.data-table thead th {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+table.data-table tbody tr {
+  border-top: 1px solid var(--gridline);
+}
+
+table.data-table tbody tr:hover {
+  background: var(--surface-2);
+}
+
+.video-frame {
+  background: #000;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
