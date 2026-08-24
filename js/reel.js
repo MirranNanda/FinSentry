@@ -13,6 +13,22 @@ function timestampToSeconds(ts) {
   return m * 60 + s;
 }
 
+function wireVideoFallback() {
+  const video = document.getElementById("reel-video");
+  const fallback = document.getElementById("video-fallback");
+  if (!video || !fallback) return;
+  const showFallback = () => {
+    video.style.display = "none";
+    fallback.classList.remove("hidden");
+  };
+  if (!video.querySelector("source").getAttribute("src")) {
+    showFallback();
+    return;
+  }
+  video.addEventListener("error", showFallback);
+  video.querySelector("source").addEventListener("error", showFallback);
+}
+
 function seekVideo(seconds) {
   const video = document.getElementById("reel-video");
   if (!video) return;
@@ -74,10 +90,16 @@ function renderReelContent(reel) {
     <section class="lg:col-span-2 flex flex-col gap-4">
       <div class="video-frame relative" style="aspect-ratio: 9/16">
         <video id="reel-video" class="w-full h-full object-cover" controls preload="metadata" poster="${escapeHtml(video.thumbnail_url)}">
-          <source src="${escapeHtml(video.video_url)}" type="video/mp4" />
+          <source src="${escapeHtml(video.video_url || "")}" type="video/mp4" />
         </video>
+        <div id="video-fallback" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-cover bg-center" style="background-image: url('${escapeHtml(video.thumbnail_url || "")}')">
+          <div class="rounded-lg px-4 py-3" style="background: rgba(0,0,0,0.6)">
+            <p class="text-sm font-medium text-white">Video preview unavailable</p>
+            <p class="text-xs text-white/70 mt-1">Instagram's video links are short-lived and don't always embed elsewhere. See the evidence and timestamp below.</p>
+          </div>
+        </div>
       </div>
-      <p class="text-xs text-center" style="color: var(--text-muted)">Mock data — video_url is a placeholder until Phase 5 wires in the real scraper.</p>
+      <p class="text-xs text-center" style="color: var(--text-muted)">Video playback depends on Instagram's CDN link still being valid — evidence and analysis below don't.</p>
 
       <div class="card p-4 flex flex-col gap-3">
         <div class="flex items-center gap-3">
@@ -162,6 +184,7 @@ function renderReelContent(reel) {
     </section>
   </div>`;
 
+  wireVideoFallback();
   if (flag) wireReviewActions();
 
   if (status === "failed") {

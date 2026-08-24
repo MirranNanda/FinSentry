@@ -121,6 +121,8 @@ curl -X POST "https://<your-project-ref>.supabase.co/functions/v1/scrape-reels" 
 
 Apify runs can take 10–60+ seconds depending on how many profiles/Reels are requested — the function polls until the run finishes. Note this calls a metered third-party service; check your Apify usage/billing if you run it frequently.
 
+**Known limitation — video playback isn't guaranteed to last.** `video_url` is Instagram's own signed CDN link, hotlinked directly rather than re-hosted. It's usually valid for some hours after scraping, and doesn't always embed reliably on a third-party site even within that window. The reel review page (`js/reel.js`) shows a "Video preview unavailable" fallback over the thumbnail when playback fails, rather than a stuck black screen — the evidence quote, timestamp, and analysis are unaffected either way, since Gemini already consumed the video permanently at analysis time. Re-hosting videos in Supabase Storage would fix this properly but wasn't in scope for the plan's MVP.
+
 ## Phase 6: connecting the pipeline
 
 Everything from Phases 2-5 already talks to Supabase; the one missing link was automatic: a new Reel landing in `videos` didn't automatically get sent to Gemini. `supabase/trigger.sql` closes that loop with a Postgres trigger — the moment `scrape-reels` (or anything else) inserts a row into `videos`, it calls `analyze-video` in the background via `pg_net` (Supabase's async HTTP extension). The insert itself is never slowed down waiting on Gemini.
