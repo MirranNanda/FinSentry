@@ -10,18 +10,18 @@
 </head>
 <body class="min-h-screen">
 
-  <header class="border-b hairline sticky top-0 z-10" style="background: var(--surface-0)">
+  <header class="border-b hairline sticky top-0 z-10 backdrop-blur-md" style="background: var(--surface-0-glass)">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
       <a href="index.html" class="flex items-center gap-2 shrink-0">
-        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg" style="background: var(--series-blue)">
+        <span class="logo-mark inline-flex items-center justify-center w-8 h-8 rounded-xl" style="background: linear-gradient(135deg, var(--accent), var(--series-blue))">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
         </span>
-        <span class="font-semibold text-lg" style="color: var(--text-primary)">FinSentry</span>
+        <span class="font-semibold text-lg font-mono-ui" style="color: var(--text-primary)">FinSentry</span>
       </a>
-      <nav class="flex items-center gap-5 text-sm flex-wrap">
-        <a href="index.html" class="nav-link active">Dashboard</a>
-        <a href="influencers.html" class="nav-link">Influencers</a>
-        <a href="flagged.html" class="nav-link">Flagged Content</a>
+      <nav class="nav-pill-group text-sm">
+        <a href="index.html" class="nav-pill active">Dashboard</a>
+        <a href="influencers.html" class="nav-pill">Influencers</a>
+        <a href="flagged.html" class="nav-pill">Flagged Content</a>
       </nav>
       <button id="theme-toggle" class="text-xs border rounded-full px-3 py-1.5 hairline shrink-0" style="color: var(--text-secondary)"></button>
     </div>
@@ -30,7 +30,7 @@
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="flex items-end justify-between flex-wrap gap-2 mb-6">
       <div>
-        <h1 class="text-2xl font-semibold" style="color: var(--text-primary)">Dashboard</h1>
+        <h1 class="page-title text-2xl font-semibold gradient-text">Dashboard</h1>
         <p class="text-sm mt-1" style="color: var(--text-secondary)">Review-priority overview across your influencer watchlist.</p>
       </div>
       <p class="text-xs" style="color: var(--text-muted)">Risk scores are a review priority signal, not a legal determination.</p>

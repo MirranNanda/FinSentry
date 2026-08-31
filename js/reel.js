@@ -63,7 +63,7 @@ function analysisStatusPanel(status, statusError) {
         <p class="font-semibold" style="color: var(--text-primary)">Analysis failed</p>
       </div>
       <p class="text-sm mb-3" style="color: var(--text-secondary)">${escapeHtml(statusError || "Unknown error.")}</p>
-      <button id="retry-analysis-btn" class="text-sm font-medium px-4 py-2 rounded-lg border hairline" style="color: var(--text-primary)">Retry analysis</button>
+      <button id="retry-analysis-btn" class="text-sm font-medium px-4 py-2 rounded-full border hairline" style="color: var(--text-primary)">Retry analysis</button>
       <p id="retry-error" class="text-xs mt-2 hidden" style="color: var(--status-critical)"></p>
     </div>`;
   }
@@ -227,10 +227,10 @@ function renderReviewPanel(flag) {
       class="w-full text-sm p-3 rounded-lg border hairline focus:outline-none mb-3"
       style="background: var(--surface-2); color: var(--text-primary)">${escapeHtml(flag.review_notes || "")}</textarea>
     <div class="flex items-center gap-2 flex-wrap">
-      <button id="mark-reviewed" class="text-sm font-medium px-4 py-2 rounded-lg" style="background: var(--status-good); color: white">
+      <button id="mark-reviewed" class="text-sm font-medium px-4 py-2 rounded-full" style="background: var(--status-good); color: white">
         ${flag.reviewed ? "Mark as pending" : "Confirm reviewed"}
       </button>
-      <button id="save-notes" class="text-sm font-medium px-4 py-2 rounded-lg border hairline" style="color: var(--text-primary)">Save notes</button>
+      <button id="save-notes" class="text-sm font-medium px-4 py-2 rounded-full border hairline" style="color: var(--text-primary)">Save notes</button>
       <p id="save-confirmation" class="text-xs hidden" style="color: var(--status-good)">Saved.</p>
       <p id="save-error" class="text-xs hidden" style="color: var(--status-critical)"></p>
     </div>

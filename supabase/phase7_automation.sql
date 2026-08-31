@@ -28,8 +28,20 @@ where status = 'pending' and id in (select video_id from analyses);
 --   - status = 'pending'/'processing' for over 10 minutes (the trigger's
 --     fire-and-forget call never landed, or the function never finished)
 -- Caps at 3 attempts per video (retry_count) so a permanently-broken video
--- (e.g. a dead video_url) doesn't retry forever, and processes at most 20
--- per run so one run can't monopolize Gemini/Apify quota.
+-- (e.g. a dead video_url) doesn't retry forever.
+--
+-- Rate-limit note: a free-tier Gemini API key allows only 5 requests/minute.
+-- Bulk-scraping many influencers at once fires that many analyze-video calls
+-- almost simultaneously and reliably exceeds that (seen in practice: 57
+-- queued at once, ~50 came back 429 RESOURCE_EXHAUSTED). So this job
+-- processes only 4 per run -- a burst of 4 is safely under 5/minute on its
+-- own -- and relies on runs being spaced apart (every 15 minutes via cron,
+-- or manually) so bursts never overlap. It intentionally does NOT pg_sleep
+-- between requests inside the function: that made a single call run ~50s,
+-- which exceeds Supabase's PostgREST statement timeout when invoked over
+-- the API (e.g. via the RPC endpoint) -- fine for cron's direct internal
+-- call, but not for ad-hoc invocation. Call it repeatedly, ~65+ seconds
+-- apart, to accelerate clearing a backlog: select public.retry_stuck_analyses();
 
 create extension if not exists pg_cron;
 
@@ -50,7 +62,7 @@ begin
         or (status in ('pending', 'processing') and created_at < now() - interval '10 minutes')
       )
     order by created_at
-    limit 20
+    limit 4
   loop
     update videos set retry_count = retry_count + 1 where id = v.id;
     perform net.http_post(

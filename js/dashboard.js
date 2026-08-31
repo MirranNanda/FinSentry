@@ -22,11 +22,35 @@ function renderStatTiles(influencers, joined) {
         <span class="w-2 h-2 rounded-full" style="background:${t.color}"></span>
         <p class="text-xs" style="color: var(--text-muted)">${t.label}</p>
       </div>
-      <p class="stat-tile-value text-3xl font-semibold" style="color: var(--text-primary)">${t.value}</p>
+      <p class="stat-tile-value text-3xl font-semibold" style="color: var(--text-primary)" data-count-to="${t.value}">0</p>
       <p class="text-xs mt-1" style="color: var(--text-secondary)">${t.sub}</p>
     </div>`
     )
     .join("");
+
+  animateCountUps();
+}
+
+// Counts each stat tile value up from 0 to its real total -- purely a visual
+// entrance effect, the underlying numbers are the exact same real data.
+function animateCountUps() {
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelectorAll("[data-count-to]").forEach((el) => {
+    const target = Number(el.getAttribute("data-count-to"));
+    if (prefersReducedMotion || !target) {
+      el.textContent = String(target);
+      return;
+    }
+    const duration = 700;
+    const start = performance.now();
+    const easeOutExpo = (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+    function tick(now) {
+      const progress = Math.min(1, (now - start) / duration);
+      el.textContent = String(Math.round(target * easeOutExpo(progress)));
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
 }
 
 function renderRiskDistribution(joined) {

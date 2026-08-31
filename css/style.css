@@ -1,19 +1,32 @@
-/* FinSentry design tokens — validated palette (see dataviz skill / palette.md).
-   Light values on :root; dark values under both the OS media query and the
-   manual [data-theme="dark"] toggle so either can win. */
+/* FinSentry design tokens.
+   Visual language inspired by a dark glass fintech/analytics dashboard
+   reference: deep navy surfaces, a soft lavender glow, monospace numerals,
+   pill-shaped nav/controls. Same semantic status colors as before (kept
+   for contrast/accessibility), just restyled surfaces and type. */
+
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap");
 
 :root {
   color-scheme: light;
 
-  --surface-0: #f9f9f7;   /* page plane */
-  --surface-1: #fcfcfb;   /* card surface */
-  --surface-2: #ffffff;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  --text-muted: #898781;
-  --gridline: #e1e0d9;
-  --border: rgba(11, 11, 11, 0.10);
-  --baseline: #c3c2b7;
+  --surface-0: #f4f5fb;   /* page plane */
+  --surface-1: #ffffff;   /* card surface */
+  --surface-2: #eef0f9;
+  --text-primary: #12142a;
+  --text-secondary: #565b82;
+  --text-muted: #8388ab;
+  --gridline: #e3e5f3;
+  --border: rgba(23, 27, 71, 0.10);
+  --baseline: #d5d8ec;
+
+  --accent: #5b64d6;
+  --accent-soft: rgba(91, 100, 214, 0.12);
+  --glow-1: rgba(120, 130, 230, 0.10);
+  --glow-2: rgba(120, 130, 230, 0.06);
+
+  --pill-active-bg: #171a33;
+  --pill-active-text: #f5f6fb;
+  --surface-0-glass: rgba(244, 245, 251, 0.78);
 
   --series-blue: #2a78d6;
   --series-orange: #eb6834;
@@ -29,20 +42,31 @@
   --status-warning-tint: rgba(250, 178, 25, 0.16);
   --status-serious-tint: rgba(236, 131, 90, 0.16);
   --status-critical-tint: rgba(208, 59, 59, 0.12);
+
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --surface-0: #0d0d0d;
-    --surface-1: #1a1a19;
-    --surface-2: #202020;
-    --text-primary: #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted: #898781;
-    --gridline: #2c2c2a;
-    --border: rgba(255, 255, 255, 0.10);
-    --baseline: #383835;
+    --surface-0: #070812;
+    --surface-1: #12142280;
+    --surface-2: #191c30;
+    --text-primary: #f5f6fb;
+    --text-secondary: #9aa0c7;
+    --text-muted: #666c93;
+    --gridline: #232744;
+    --border: rgba(160, 170, 230, 0.14);
+    --baseline: #2b2f4d;
+
+    --accent: #a9b5f5;
+    --accent-soft: rgba(169, 181, 245, 0.14);
+    --glow-1: rgba(130, 145, 255, 0.20);
+    --glow-2: rgba(120, 140, 255, 0.10);
+
+    --pill-active-bg: #eceffb;
+    --pill-active-text: #12142a;
+    --surface-0-glass: rgba(7, 8, 18, 0.72);
 
     --series-blue: #3987e5;
     --series-orange: #d95926;
@@ -54,24 +78,32 @@
     --status-serious: #ec835a;
     --status-critical: #e66767;
 
-    --status-good-tint: rgba(12, 163, 12, 0.18);
-    --status-warning-tint: rgba(250, 178, 25, 0.18);
-    --status-serious-tint: rgba(236, 131, 90, 0.18);
-    --status-critical-tint: rgba(230, 103, 103, 0.18);
+    --status-good-tint: rgba(12, 163, 12, 0.16);
+    --status-warning-tint: rgba(250, 178, 25, 0.16);
+    --status-serious-tint: rgba(236, 131, 90, 0.16);
+    --status-critical-tint: rgba(230, 103, 103, 0.16);
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --surface-0: #0d0d0d;
-  --surface-1: #1a1a19;
-  --surface-2: #202020;
-  --text-primary: #ffffff;
-  --text-secondary: #c3c2b7;
-  --text-muted: #898781;
-  --gridline: #2c2c2a;
-  --border: rgba(255, 255, 255, 0.10);
-  --baseline: #383835;
+  --surface-0: #070812;
+  --surface-1: #12142280;
+  --surface-2: #191c30;
+  --text-primary: #f5f6fb;
+  --text-secondary: #9aa0c7;
+  --text-muted: #666c93;
+  --gridline: #232744;
+  --border: rgba(160, 170, 230, 0.14);
+  --baseline: #2b2f4d;
+
+  --accent: #a9b5f5;
+  --accent-soft: rgba(169, 181, 245, 0.14);
+  --glow-1: rgba(130, 145, 255, 0.20);
+  --glow-2: rgba(120, 140, 255, 0.10);
+
+  --pill-active-bg: #eceffb;
+  --pill-active-text: #12142a;
 
   --series-blue: #3987e5;
   --series-orange: #d95926;
@@ -83,30 +115,123 @@
   --status-serious: #ec835a;
   --status-critical: #e66767;
 
-  --status-good-tint: rgba(12, 163, 12, 0.18);
-  --status-warning-tint: rgba(250, 178, 25, 0.18);
-  --status-serious-tint: rgba(236, 131, 90, 0.18);
-  --status-critical-tint: rgba(230, 103, 103, 0.18);
+  --status-good-tint: rgba(12, 163, 12, 0.16);
+  --status-warning-tint: rgba(250, 178, 25, 0.16);
+  --status-serious-tint: rgba(236, 131, 90, 0.16);
+  --status-critical-tint: rgba(230, 103, 103, 0.16);
+}
+
+html {
+  background: var(--surface-0);
 }
 
 body {
   background: var(--surface-0);
   color: var(--text-primary);
   font-variant-numeric: proportional-nums;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 900px 480px at 50% -8%, var(--glow-1), transparent 62%),
+    radial-gradient(ellipse 700px 420px at 105% 5%, var(--glow-2), transparent 60%);
+  animation: glowPulse 10s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
 }
 
 .tabular {
   font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+.font-mono-ui {
+  font-family: var(--font-mono);
+}
+
+h1, .page-title {
+  font-family: var(--font-mono);
+  letter-spacing: -0.02em;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, var(--text-primary), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.logo-mark {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+a:hover .logo-mark {
+  transform: rotate(-6deg) scale(1.06);
+  box-shadow: 0 0 0 4px var(--accent-soft);
 }
 
 .card {
   background: var(--surface-1);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: 1.1rem;
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.03) inset, 0 12px 32px -20px rgba(20, 24, 60, 0.35);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+a.card:hover, .card.interactive:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 20px 40px -18px rgba(20, 24, 60, 0.45), 0 0 0 1px var(--accent-soft);
+}
+
+a.card:active, .card.interactive:active {
+  transform: translateY(-1px) scale(0.997);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.grid > .card:nth-child(1), .grid > a.card:nth-child(1) { animation-delay: 0ms; }
+.grid > .card:nth-child(2), .grid > a.card:nth-child(2) { animation-delay: 50ms; }
+.grid > .card:nth-child(3), .grid > a.card:nth-child(3) { animation-delay: 100ms; }
+.grid > .card:nth-child(4), .grid > a.card:nth-child(4) { animation-delay: 150ms; }
+.grid > .card:nth-child(5), .grid > a.card:nth-child(5) { animation-delay: 200ms; }
+.grid > .card:nth-child(6), .grid > a.card:nth-child(6) { animation-delay: 250ms; }
+.grid > .card:nth-child(n+7), .grid > a.card:nth-child(n+7) { animation-delay: 300ms; }
+
+table.data-table tbody tr {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: background-color 0.15s ease;
+}
+table.data-table tbody tr:nth-child(1) { animation-delay: 0ms; }
+table.data-table tbody tr:nth-child(2) { animation-delay: 30ms; }
+table.data-table tbody tr:nth-child(3) { animation-delay: 60ms; }
+table.data-table tbody tr:nth-child(4) { animation-delay: 90ms; }
+table.data-table tbody tr:nth-child(5) { animation-delay: 120ms; }
+table.data-table tbody tr:nth-child(n+6) { animation-delay: 150ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card, table.data-table tbody tr { animation: none; }
 }
 
 .stat-tile-value {
   font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
   letter-spacing: -0.01em;
 }
 
@@ -118,14 +243,16 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.15rem 0.55rem;
+  padding: 0.15rem 0.6rem;
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
+  font-family: var(--font-mono);
   line-height: 1.4;
   white-space: nowrap;
   color: var(--text-primary);
   border: 1px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .badge-good { background: var(--status-good-tint); color: var(--status-good); border-color: var(--status-good); }
@@ -144,7 +271,47 @@ body {
 :root[data-theme="dark"] .badge-warning { color: var(--status-warning); }
 :root[data-theme="dark"] .badge-serious { color: var(--status-serious); }
 
-/* ---- Nav active link ------------------------------------------------ */
+/* ---- Nav pills -------------------------------------------------------- */
+/* Pill-shaped tab navigation, inspired by the reference's tab row: plain
+   muted text when inactive, a solid inverse-contrast pill when active. */
+
+.nav-pill-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.nav-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  transition: color 0.15s ease, background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s ease;
+}
+
+.nav-pill:hover {
+  color: var(--text-primary);
+}
+
+.nav-pill:active {
+  transform: scale(0.96);
+}
+
+.nav-pill.active {
+  background: var(--pill-active-bg);
+  color: var(--pill-active-text);
+  transform: scale(1.02);
+}
+
+/* ---- Nav active link (legacy inline links, e.g. footer/back links) --- */
 
 .nav-link {
   color: var(--text-secondary);
@@ -168,8 +335,9 @@ body {
 }
 
 .risk-bar-track {
-  height: 0.6rem;
-  background: var(--gridline);
+  height: 0.5rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
   border-radius: 999px;
   overflow: hidden;
 }
@@ -177,6 +345,51 @@ body {
 .risk-bar-fill {
   height: 100%;
   border-radius: 999px;
+  transition: width 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .risk-bar-fill { transition: none; }
+}
+
+/* ---- Buttons & form controls: pill-shaped to match the reference ----- */
+
+.pill-input,
+.pill-select,
+.pill-btn {
+  border-radius: 999px !important;
+}
+
+button, input, select, textarea, a {
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+input[type="text"]:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+#theme-toggle svg, #theme-toggle {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease;
+}
+#theme-toggle:hover {
+  border-color: var(--accent) !important;
+  color: var(--text-primary);
+}
+#theme-toggle:active {
+  transform: scale(0.92) rotate(-12deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button, input, select, textarea, a, #theme-toggle {
+    transition: none;
+    animation: none;
+  }
 }
 
 /* ---- Misc ------------------------------------------------------------ */
@@ -187,10 +400,11 @@ body {
 
 table.data-table thead th {
   color: var(--text-muted);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   font-weight: 600;
+  font-family: var(--font-mono);
 }
 
 table.data-table tbody tr {
@@ -203,6 +417,6 @@ table.data-table tbody tr:hover {
 
 .video-frame {
   background: #000;
-  border-radius: 0.75rem;
+  border-radius: 1.1rem;
   overflow: hidden;
 }
