@@ -50,7 +50,7 @@
       <section class="card p-5 lg:col-span-3">
         <div class="flex items-center justify-between mb-4">
           <h2 class="font-semibold" style="color: var(--text-primary)">Recently flagged</h2>
-          <a href="flagged.html" class="text-sm nav-link">View all →</a>
+          <a href="flagged.html" class="text-sm nav-link font-semibold">View all →</a>
         </div>
         <div class="overflow-x-auto">
           <table class="data-table w-full text-sm">
@@ -68,6 +68,22 @@
         </div>
       </section>
     </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
+      <!-- Avg risk score by influencer -->
+      <section class="card p-5 lg:col-span-2">
+        <h2 class="font-semibold mb-1" style="color: var(--text-primary)">Risk score by influencer</h2>
+        <p class="text-xs mb-4" style="color: var(--text-muted)">Average across each influencer's analyzed reels.</p>
+        <div id="risk-by-influencer-chart"></div>
+      </section>
+
+      <!-- Reels analyzed over time -->
+      <section class="card p-5 lg:col-span-3">
+        <h2 class="font-semibold mb-1" style="color: var(--text-primary)">Reels analyzed</h2>
+        <p class="text-xs mb-4" style="color: var(--text-muted)">Monthly, by the Reel's original posting date.</p>
+        <div id="reels-timeline-chart"></div>
+      </section>
+    </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -75,6 +91,7 @@
   <script src="js/supabaseClient.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/db.js"></script>
+  <script src="js/charts.js"></script>
   <script src="js/dashboard.js"></script>
 </body>
 </html>

@@ -62,14 +62,15 @@ function renderRiskDistribution(joined) {
   const max = Math.max(1, ...Object.values(counts));
   const colorVar = { LOW: "var(--status-good)", REVIEW: "var(--status-warning)", HIGH: "var(--status-serious)", CRITICAL: "var(--status-critical)" };
 
-  document.getElementById("risk-distribution").innerHTML = RISK_LEVELS.map((level) => {
+  const container = document.getElementById("risk-distribution");
+  container.innerHTML = RISK_LEVELS.map((level) => {
     const count = counts[level];
     const pct = Math.round((count / max) * 100);
     return `
     <div class="risk-bar-row">
       <span class="text-sm" style="color: var(--text-secondary)">${RISK_META[level].label}</span>
       <div class="risk-bar-track">
-        <div class="risk-bar-fill" style="width:${pct}%; background:${colorVar[level]}"></div>
+        <div class="risk-bar-fill" style="--target:${pct}%; background:${colorVar[level]}"></div>
       </div>
       <span class="text-sm tabular text-right" style="color: var(--text-primary)">${count}</span>
     </div>`;
@@ -104,6 +105,8 @@ async function loadDashboard() {
     renderStatTiles(influencers, joined);
     renderRiskDistribution(joined);
     renderRecentFlags(joined.filter((r) => r.flag !== null));
+    renderRiskByInfluencerChart(document.getElementById("risk-by-influencer-chart"), joined);
+    renderReelsTimelineChart(document.getElementById("reels-timeline-chart"), joined);
   } catch (error) {
     statTiles.innerHTML = "";
     document.querySelector("main").insertAdjacentHTML("afterbegin", errorHTML(error));

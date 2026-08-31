@@ -28,6 +28,13 @@
   --pill-active-text: #f5f6fb;
   --surface-0-glass: rgba(244, 245, 251, 0.78);
 
+  --chart-line: #363a6b;
+  --chart-line-dashed: #a7abd6;
+  --chart-fill-top: rgba(91, 100, 214, 0.16);
+  --chart-fill-bottom: rgba(91, 100, 214, 0);
+  --chart-grid: rgba(23, 27, 71, 0.06);
+  --chart-marker: #ffffff;
+
   --series-blue: #2a78d6;
   --series-orange: #eb6834;
   --series-aqua: #1baf7a;
@@ -49,24 +56,31 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --surface-0: #070812;
-    --surface-1: #12142280;
-    --surface-2: #191c30;
-    --text-primary: #f5f6fb;
-    --text-secondary: #9aa0c7;
-    --text-muted: #666c93;
-    --gridline: #232744;
-    --border: rgba(160, 170, 230, 0.14);
-    --baseline: #2b2f4d;
+    --surface-0: #08080f;
+    --surface-1: #121320;
+    --surface-2: #1a1c2e;
+    --text-primary: #f7f7fc;
+    --text-secondary: #9497bd;
+    --text-muted: #63668a;
+    --gridline: #23253c;
+    --border: rgba(150, 158, 224, 0.16);
+    --baseline: #2b2d48;
 
-    --accent: #a9b5f5;
-    --accent-soft: rgba(169, 181, 245, 0.14);
-    --glow-1: rgba(130, 145, 255, 0.20);
-    --glow-2: rgba(120, 140, 255, 0.10);
+    --accent: #a5b0f7;
+    --accent-soft: rgba(165, 176, 247, 0.16);
+    --glow-1: rgba(130, 145, 255, 0.28);
+    --glow-2: rgba(120, 140, 255, 0.14);
 
-    --pill-active-bg: #eceffb;
-    --pill-active-text: #12142a;
-    --surface-0-glass: rgba(7, 8, 18, 0.72);
+    --pill-active-bg: #eef0fb;
+    --pill-active-text: #0e0f1c;
+    --surface-0-glass: rgba(8, 8, 15, 0.74);
+
+    --chart-line: #f0f1fb;
+    --chart-line-dashed: #6d7099;
+    --chart-fill-top: rgba(165, 176, 247, 0.28);
+    --chart-fill-bottom: rgba(165, 176, 247, 0);
+    --chart-grid: rgba(255, 255, 255, 0.07);
+    --chart-marker: #0e0f1c;
 
     --series-blue: #3987e5;
     --series-orange: #d95926;
@@ -87,23 +101,31 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --surface-0: #070812;
-  --surface-1: #12142280;
-  --surface-2: #191c30;
-  --text-primary: #f5f6fb;
-  --text-secondary: #9aa0c7;
-  --text-muted: #666c93;
-  --gridline: #232744;
-  --border: rgba(160, 170, 230, 0.14);
-  --baseline: #2b2f4d;
+  --surface-0: #08080f;
+  --surface-1: #121320;
+  --surface-2: #1a1c2e;
+  --text-primary: #f7f7fc;
+  --text-secondary: #9497bd;
+  --text-muted: #63668a;
+  --gridline: #23253c;
+  --border: rgba(150, 158, 224, 0.16);
+  --baseline: #2b2d48;
 
-  --accent: #a9b5f5;
-  --accent-soft: rgba(169, 181, 245, 0.14);
-  --glow-1: rgba(130, 145, 255, 0.20);
-  --glow-2: rgba(120, 140, 255, 0.10);
+  --accent: #a5b0f7;
+  --accent-soft: rgba(165, 176, 247, 0.16);
+  --glow-1: rgba(130, 145, 255, 0.28);
+  --glow-2: rgba(120, 140, 255, 0.14);
 
-  --pill-active-bg: #eceffb;
-  --pill-active-text: #12142a;
+  --pill-active-bg: #eef0fb;
+  --pill-active-text: #0e0f1c;
+  --surface-0-glass: rgba(8, 8, 15, 0.74);
+
+  --chart-line: #f0f1fb;
+  --chart-line-dashed: #6d7099;
+  --chart-fill-top: rgba(165, 176, 247, 0.28);
+  --chart-fill-bottom: rgba(165, 176, 247, 0);
+  --chart-grid: rgba(255, 255, 255, 0.07);
+  --chart-marker: #0e0f1c;
 
   --series-blue: #3987e5;
   --series-orange: #d95926;
@@ -314,7 +336,7 @@ table.data-table tbody tr:nth-child(n+6) { animation-delay: 150ms; }
 /* ---- Nav active link (legacy inline links, e.g. footer/back links) --- */
 
 .nav-link {
-  color: var(--text-secondary);
+  color: var(--accent);
   font-weight: 500;
 }
 .nav-link:hover {
@@ -345,11 +367,114 @@ table.data-table tbody tr:nth-child(n+6) { animation-delay: 150ms; }
 .risk-bar-fill {
   height: 100%;
   border-radius: 999px;
-  transition: width 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  width: var(--target, 0%);
+  animation: growWidth 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes growWidth {
+  from { width: 0%; }
+  to { width: var(--target, 0%); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .risk-bar-fill { transition: none; }
+  .risk-bar-fill { animation: none; width: var(--target, 0%); }
+}
+
+/* ---- Influencer risk bar chart (dashboard) --------------------------- */
+
+.chart-bar-row {
+  display: grid;
+  grid-template-columns: 9rem 1fr 2rem;
+  align-items: center;
+  gap: 0.75rem;
+  opacity: 0;
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.chart-bar-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chart-bar-track {
+  height: 0.55rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.chart-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  width: var(--target, 0%);
+  animation: growWidth 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chart-bar-row { animation: none; opacity: 1; }
+  .chart-bar-fill { animation: none; width: var(--target, 0%); }
+}
+
+/* ---- Reels-by-month bar chart (dashboard) ---------------------------- */
+
+.chart-vbar-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.35rem;
+  height: 190px;
+  padding-top: 0.5rem;
+}
+
+.chart-vbar {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  height: 100%;
+  min-width: 0.35rem;
+  opacity: 0;
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.chart-vbar-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  border-bottom: 1px solid var(--gridline);
+}
+
+.chart-vbar-fill {
+  width: 100%;
+  height: var(--target, 0%);
+  min-height: 2px;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, var(--accent), var(--series-blue));
+  animation: growHeight 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: inherit;
+}
+
+@keyframes growHeight {
+  from { height: 0%; }
+  to { height: var(--target, 0%); }
+}
+
+.chart-vbar-label {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  transform: rotate(0deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chart-vbar { animation: none; opacity: 1; }
+  .chart-vbar-fill { animation: none; height: var(--target, 0%); }
 }
 
 /* ---- Buttons & form controls: pill-shaped to match the reference ----- */
