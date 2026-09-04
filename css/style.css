@@ -4,7 +4,7 @@
    pill-shaped nav/controls. Same semantic status colors as before (kept
    for contrast/accessibility), just restyled surfaces and type. */
 
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
 
 :root {
   color-scheme: light;
@@ -19,10 +19,12 @@
   --border: rgba(23, 27, 71, 0.10);
   --baseline: #d5d8ec;
 
-  --accent: #5b64d6;
-  --accent-soft: rgba(91, 100, 214, 0.12);
-  --glow-1: rgba(120, 130, 230, 0.10);
-  --glow-2: rgba(120, 130, 230, 0.06);
+  --accent: #2f6fed;
+  --accent-2: #17c3e6;
+  --accent-soft: rgba(47, 111, 237, 0.12);
+  --glow-1: rgba(47, 111, 237, 0.10);
+  --glow-2: rgba(23, 195, 230, 0.07);
+  --glow-shadow: rgba(47, 111, 237, 0.25);
 
   --pill-active-bg: #171a33;
   --pill-active-text: #f5f6fb;
@@ -51,6 +53,8 @@
   --status-critical-tint: rgba(208, 59, 59, 0.12);
 
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: "Chakra Petch", "JetBrains Mono", ui-monospace, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -66,10 +70,12 @@
     --border: rgba(150, 158, 224, 0.16);
     --baseline: #2b2d48;
 
-    --accent: #a5b0f7;
-    --accent-soft: rgba(165, 176, 247, 0.16);
-    --glow-1: rgba(130, 145, 255, 0.28);
-    --glow-2: rgba(120, 140, 255, 0.14);
+    --accent: #4f8bff;
+    --accent-2: #22d3ee;
+    --accent-soft: rgba(79, 139, 255, 0.18);
+    --glow-1: rgba(79, 139, 255, 0.30);
+    --glow-2: rgba(34, 211, 238, 0.14);
+    --glow-shadow: rgba(79, 139, 255, 0.45);
 
     --pill-active-bg: #eef0fb;
     --pill-active-text: #0e0f1c;
@@ -150,6 +156,7 @@ html {
 body {
   background: var(--surface-0);
   color: var(--text-primary);
+  font-family: var(--font-body);
   font-variant-numeric: proportional-nums;
   position: relative;
 }
@@ -184,9 +191,27 @@ body::before {
   font-family: var(--font-mono);
 }
 
+.font-display {
+  font-family: var(--font-display);
+}
+
+.mono-text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
 h1, .page-title {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   letter-spacing: -0.02em;
+  font-size: clamp(1.75rem, 3vw, 2.5rem) !important;
+  font-weight: 700 !important;
+  line-height: 1.1;
 }
 
 .gradient-text {
@@ -292,6 +317,114 @@ table.data-table tbody tr:nth-child(n+6) { animation-delay: 150ms; }
 }
 :root[data-theme="dark"] .badge-warning { color: var(--status-warning); }
 :root[data-theme="dark"] .badge-serious { color: var(--status-serious); }
+
+/* ---- App shell: sidebar layout ---------------------------------------- */
+
+.app-shell {
+  display: flex;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 232px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px 14px;
+  border-right: 1px solid var(--border);
+  background: var(--surface-1);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px;
+  margin-bottom: 28px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.88rem;
+  border-left: 3px solid transparent;
+}
+.sidebar-link:hover {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+.sidebar-link.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+.sidebar-link svg {
+  flex-shrink: 0;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  padding: 36px 40px 64px;
+  max-width: 1400px;
+}
+
+@media (max-width: 860px) {
+  .app-shell { flex-direction: column; }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 16px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .sidebar-logo { margin-bottom: 0; margin-right: 8px; padding: 4px 2px; }
+  .sidebar-nav { flex-direction: row; }
+  .sidebar-link { border-left: none; border-bottom: 3px solid transparent; padding: 8px 10px; white-space: nowrap; }
+  .sidebar-link.active { border-left-color: transparent; border-bottom-color: var(--accent); }
+  .sidebar-link span.link-label { display: none; }
+  .sidebar-footer { margin-top: 0; padding-top: 0; border-top: none; margin-left: auto; padding-left: 8px; }
+  .app-main { padding: 20px; }
+}
+
+/* Gradient-glow border, used sparingly on the highest-priority cards
+   (stat tiles) rather than every card, to keep the page calm elsewhere. */
+.card-glow {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface-1), var(--surface-1)) padding-box,
+    linear-gradient(135deg, var(--accent), var(--accent-2, var(--accent))) border-box;
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.03) inset, 0 16px 40px -22px var(--glow-shadow);
+}
 
 /* ---- Nav pills -------------------------------------------------------- */
 /* Pill-shaped tab navigation, inspired by the reference's tab row: plain
@@ -475,6 +608,102 @@ table.data-table tbody tr:nth-child(n+6) { animation-delay: 150ms; }
 @media (prefers-reduced-motion: reduce) {
   .chart-vbar { animation: none; opacity: 1; }
   .chart-vbar-fill { animation: none; height: var(--target, 0%); }
+}
+
+/* ---- Risk gauge (radial ring) -- influencer cards, table, reel page --- */
+
+.risk-gauge-arc {
+  stroke-dashoffset: var(--c, 0);
+  animation: gaugeFill 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes gaugeFill {
+  from { stroke-dashoffset: var(--c, 0); }
+  to { stroke-dashoffset: var(--offset, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .risk-gauge-arc { animation: none; stroke-dashoffset: var(--offset, 0); }
+}
+
+.risk-mini-bar-track {
+  width: 4.5rem;
+  height: 0.4rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.risk-mini-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  width: var(--target, 0%);
+  animation: growWidth 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .risk-mini-bar-fill { animation: none; width: var(--target, 0%); }
+}
+
+.risk-gauge-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 5px dashed var(--gridline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ---- Glowing buttons ("fancy buttons") -------------------------------- */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+  border-radius: 999px;
+  box-shadow: 0 4px 22px -6px var(--glow-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.btn-primary:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 28px -4px var(--glow-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.btn-primary:disabled {
+  opacity: 0.6;
+  filter: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-weight: 600;
+  border-radius: 999px;
+}
+.btn-secondary:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.btn-glow-good {
+  background: var(--status-good);
+  box-shadow: 0 4px 22px -6px rgba(12, 163, 12, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+.btn-glow-good:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 28px -4px rgba(12, 163, 12, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 /* ---- Buttons & form controls: pill-shaped to match the reference ----- */

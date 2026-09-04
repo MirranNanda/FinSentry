@@ -29,6 +29,34 @@ const BUCKET_COLOR = {
   CRITICAL: "var(--status-critical)",
 };
 
+// A radial "gauge" ring for a single 0-100 risk score. Used on influencer
+// cards, the flagged-content table, and the reel review page -- always the
+// same real risk_score value already computed by Phase 4, just rendered as
+// a ring instead of (or next to) plain text. showLabel=false renders just
+// the ring with no center number, for compact inline use.
+function riskGaugeSVG(score, { size = 56, strokeWidth = 6, showLabel = true } = {}) {
+  const clamped = Math.min(100, Math.max(0, score));
+  const level = riskBucket(clamped);
+  const color = BUCKET_COLOR[level];
+  const r = (size - strokeWidth) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c * (1 - clamped / 100);
+  const fontSize = Math.round(size * 0.3);
+  const center = size / 2;
+
+  const label = showLabel
+    ? `<text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" class="font-mono-ui" font-size="${fontSize}" font-weight="700" fill="var(--text-primary)">${Math.round(clamped)}</text>`
+    : "";
+
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" class="risk-gauge" role="img" aria-label="Risk score ${Math.round(clamped)} of 100">
+    <circle cx="${center}" cy="${center}" r="${r}" fill="none" stroke="var(--gridline)" stroke-width="${strokeWidth}" />
+    <circle cx="${center}" cy="${center}" r="${r}" fill="none" stroke="${color}" stroke-width="${strokeWidth}"
+      stroke-linecap="round" stroke-dasharray="${c}" style="--c:${c}; --offset:${offset}"
+      class="risk-gauge-arc" transform="rotate(-90 ${center} ${center})" />
+    ${label}
+  </svg>`;
+}
+
 // ---- Chart 1: average risk score by influencer (horizontal bars) --------
 
 function renderRiskByInfluencerChart(container, joined) {

@@ -9,6 +9,10 @@ const RISK_META = {
   CRITICAL: { status: "critical", icon: "octagon", label: "Critical" },
 };
 
+function riskLevelColorVar(level) {
+  return { LOW: "var(--status-good)", REVIEW: "var(--status-warning)", HIGH: "var(--status-serious)", CRITICAL: "var(--status-critical)" }[level] || "var(--text-muted)";
+}
+
 const RISK_ICON_SVG = {
   check: '<path d="M4 8.5 6.5 11 12 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
   dot: '<circle cx="8" cy="8" r="3.2" fill="currentColor"/>',

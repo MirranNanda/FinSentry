@@ -44,7 +44,14 @@ function flaggedRow(row) {
     </td>
     <td class="px-4 py-3">${recommendationBadge(analysis.recommendation)}</td>
     <td class="px-4 py-3 tabular" style="color: var(--text-secondary)">${escapeHtml(analysis.price_target || "—")}</td>
-    <td class="px-4 py-3 tabular font-semibold" style="color: var(--text-primary)">${analysis.risk_score}</td>
+    <td class="px-4 py-3">
+      <div class="flex items-center gap-2">
+        <span class="tabular font-semibold text-sm w-6" style="color: var(--text-primary)">${analysis.risk_score}</span>
+        <div class="risk-mini-bar-track">
+          <div class="risk-mini-bar-fill" style="--target:${Math.max(2, analysis.risk_score)}%; background:${riskLevelColorVar(analysis.risk_level)}"></div>
+        </div>
+      </div>
+    </td>
     <td class="px-4 py-3">${riskBadge(analysis.risk_level)}</td>
     <td class="px-4 py-3">${reviewedBadge(flag.reviewed)}</td>
     <td class="px-4 py-3 tabular" style="color: var(--text-muted)">${formatDate(video.posted_at)}</td>

@@ -63,7 +63,7 @@ function analysisStatusPanel(status, statusError) {
         <p class="font-semibold" style="color: var(--text-primary)">Analysis failed</p>
       </div>
       <p class="text-sm mb-3" style="color: var(--text-secondary)">${escapeHtml(statusError || "Unknown error.")}</p>
-      <button id="retry-analysis-btn" class="text-sm font-medium px-4 py-2 rounded-full border hairline" style="color: var(--text-primary)">Retry analysis</button>
+      <button id="retry-analysis-btn" class="btn-secondary text-sm px-4 py-2">Retry analysis</button>
       <p id="retry-error" class="text-xs mt-2 hidden" style="color: var(--status-critical)"></p>
     </div>`;
   }
@@ -154,9 +154,9 @@ function renderReelContent(reel) {
             <p class="text-[11px]" style="color: var(--text-muted)">Certainty</p>
             <p class="font-semibold text-sm mt-0.5" style="color: var(--text-primary)">${escapeHtml(analysis.certainty)}</p>
           </div>
-          <div class="card p-3" style="background: var(--surface-2)">
-            <p class="text-[11px]" style="color: var(--text-muted)">Risk score</p>
-            <p class="tabular font-semibold text-sm mt-0.5" style="color: ${riskColor}">${analysis.risk_score} / 100</p>
+          <div class="card p-3 flex items-center justify-between" style="background: var(--surface-2)">
+            <span class="text-[11px]" style="color: var(--text-muted)">Risk score</span>
+            ${riskGaugeSVG(analysis.risk_score, { size: 40, strokeWidth: 4 })}
           </div>
         </div>
 
@@ -227,10 +227,10 @@ function renderReviewPanel(flag) {
       class="w-full text-sm p-3 rounded-lg border hairline focus:outline-none mb-3"
       style="background: var(--surface-2); color: var(--text-primary)">${escapeHtml(flag.review_notes || "")}</textarea>
     <div class="flex items-center gap-2 flex-wrap">
-      <button id="mark-reviewed" class="text-sm font-medium px-4 py-2 rounded-full" style="background: var(--status-good); color: white">
+      <button id="mark-reviewed" class="btn-primary btn-glow-good text-sm px-4 py-2">
         ${flag.reviewed ? "Mark as pending" : "Confirm reviewed"}
       </button>
-      <button id="save-notes" class="text-sm font-medium px-4 py-2 rounded-full border hairline" style="color: var(--text-primary)">Save notes</button>
+      <button id="save-notes" class="btn-secondary text-sm px-4 py-2">Save notes</button>
       <p id="save-confirmation" class="text-xs hidden" style="color: var(--status-good)">Saved.</p>
       <p id="save-error" class="text-xs hidden" style="color: var(--status-critical)"></p>
     </div>

@@ -4,44 +4,57 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FinSentry — Reel Review</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/theme.js"></script>
 </head>
 <body class="min-h-screen">
 
-  <header class="border-b hairline sticky top-0 z-10 backdrop-blur-md" style="background: var(--surface-0-glass)">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-      <a href="index.html" class="flex items-center gap-2 shrink-0">
-        <span class="logo-mark inline-flex items-center justify-center w-8 h-8 rounded-xl" style="background: linear-gradient(135deg, var(--accent), var(--series-blue))">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="index.html" class="sidebar-logo">
+        <span class="logo-mark inline-flex items-center justify-center w-8 h-8 rounded-xl shrink-0" style="background: var(--surface-2); border: 1px solid var(--border)">
+          <span class="mono-text" style="font-size: 15px">fS</span>
         </span>
-        <span class="font-semibold text-lg font-mono-ui" style="color: var(--text-primary)">FinSentry</span>
+        <span class="font-display text-lg" style="color: var(--text-primary); font-weight: 700">Fin<span style="color: var(--text-secondary); font-weight: 600">Sentry</span></span>
       </a>
-      <nav class="nav-pill-group text-sm">
-        <a href="index.html" class="nav-pill">Dashboard</a>
-        <a href="influencers.html" class="nav-pill">Influencers</a>
-        <a href="flagged.html" class="nav-pill active">Flagged Content</a>
+      <nav class="sidebar-nav">
+        <a href="index.html" class="sidebar-link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          <span class="link-label">Dashboard</span>
+        </a>
+        <a href="influencers.html" class="sidebar-link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="link-label">Influencers</span>
+        </a>
+        <a href="flagged.html" class="sidebar-link active">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          <span class="link-label">Flagged Content</span>
+        </a>
       </nav>
-      <button id="theme-toggle" class="text-xs border rounded-full px-3 py-1.5 hairline shrink-0" style="color: var(--text-secondary)"></button>
-    </div>
-  </header>
+      <div class="sidebar-footer">
+        <button id="theme-toggle" class="text-xs border rounded-full px-3 py-1.5 hairline w-full" style="color: var(--text-secondary)"></button>
+      </div>
+    </aside>
 
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <a href="flagged.html" class="text-sm nav-link inline-flex items-center gap-1 mb-4">← Back to flagged content</a>
+    <main class="app-main" style="max-width: 1152px">
+      <a href="flagged.html" class="text-sm nav-link inline-flex items-center gap-1 mb-4">← Back to flagged content</a>
 
-    <div id="reel-content"></div>
-    <div id="not-found" class="hidden text-center py-16">
-      <p class="text-lg font-semibold" style="color: var(--text-primary)">Reel not found</p>
-      <p class="text-sm mt-1" style="color: var(--text-secondary)">It may have been removed, or the link is invalid.</p>
-    </div>
-  </main>
+      <div id="reel-content"></div>
+      <div id="not-found" class="hidden text-center py-16">
+        <p class="text-lg font-semibold" style="color: var(--text-primary)">Reel not found</p>
+        <p class="text-sm mt-1" style="color: var(--text-secondary)">It may have been removed, or the link is invalid.</p>
+      </div>
+    </main>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js"></script>
   <script src="js/supabaseClient.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/db.js"></script>
+  <script src="js/charts.js"></script>
   <script src="js/reel.js"></script>
 </body>
 </html>

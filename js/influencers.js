@@ -8,35 +8,44 @@ function influencerStats(influencer) {
   const reels = allJoinedReels.filter((r) => r.influencer && r.influencer.id === influencer.id);
   const flagged = reels.filter((r) => r.flag !== null);
   const critical = flagged.filter((r) => r.analysis.risk_level === "CRITICAL").length;
-  return { reelCount: reels.length, flagCount: flagged.length, critical };
+  const analyzed = reels.filter((r) => r.analysis);
+  const avgRisk = analyzed.length ? Math.round(analyzed.reduce((sum, r) => sum + r.analysis.risk_score, 0) / analyzed.length) : null;
+  return { reelCount: reels.length, flagCount: flagged.length, critical, avgRisk };
 }
 
 function influencerCard(influencer) {
   const stats = influencerStats(influencer);
   const initial = influencer.username.charAt(0).toUpperCase();
+  const gauge =
+    stats.avgRisk === null
+      ? `<div class="risk-gauge-placeholder" title="No analyzed reels yet">—</div>`
+      : riskGaugeSVG(stats.avgRisk, { size: 48, strokeWidth: 5 });
   return `
-  <a href="flagged.html?influencer=${influencer.id}" class="card p-4 flex flex-col gap-3 hover:shadow-sm transition-shadow">
+  <a href="flagged.html?influencer=${influencer.id}" class="card p-4 flex flex-col gap-3 interactive">
     <div class="flex items-center gap-3">
       <div class="w-11 h-11 rounded-full flex items-center justify-center text-white font-semibold shrink-0" style="background: var(--series-blue)">${initial}</div>
-      <div class="min-w-0">
+      <div class="min-w-0 flex-1">
         <p class="font-semibold truncate" style="color: var(--text-primary)">@${escapeHtml(influencer.username)}</p>
         <p class="text-xs truncate" style="color: var(--text-secondary)">${escapeHtml(influencer.name)}</p>
       </div>
-      <span class="ml-auto badge ${influencer.active ? "badge-good" : "badge-neutral"} shrink-0">${influencer.active ? "Active" : "Inactive"}</span>
+      <span class="badge ${influencer.active ? "badge-good" : "badge-neutral"} shrink-0">${influencer.active ? "Active" : "Inactive"}</span>
     </div>
-    <div class="grid grid-cols-3 gap-2 text-center pt-2 border-t hairline">
-      <div>
-        <p class="tabular font-semibold text-sm" style="color: var(--text-primary)">${formatFollowers(influencer.followers)}</p>
-        <p class="text-[11px]" style="color: var(--text-muted)">Followers</p>
+    <div class="flex items-center gap-3 pt-2 border-t hairline">
+      <div class="flex-1 grid grid-cols-3 gap-2 text-center">
+        <div>
+          <p class="tabular font-semibold text-sm" style="color: var(--text-primary)">${formatFollowers(influencer.followers)}</p>
+          <p class="text-[11px]" style="color: var(--text-muted)">Followers</p>
+        </div>
+        <div>
+          <p class="tabular font-semibold text-sm" style="color: var(--text-primary)">${stats.reelCount}</p>
+          <p class="text-[11px]" style="color: var(--text-muted)">Reels</p>
+        </div>
+        <div>
+          <p class="tabular font-semibold text-sm" style="color: ${stats.flagCount > 0 ? "var(--status-critical)" : "var(--text-primary)"}">${stats.flagCount}</p>
+          <p class="text-[11px]" style="color: var(--text-muted)">Flagged</p>
+        </div>
       </div>
-      <div>
-        <p class="tabular font-semibold text-sm" style="color: var(--text-primary)">${stats.reelCount}</p>
-        <p class="text-[11px]" style="color: var(--text-muted)">Reels</p>
-      </div>
-      <div>
-        <p class="tabular font-semibold text-sm" style="color: ${stats.flagCount > 0 ? "var(--status-critical)" : "var(--text-primary)"}">${stats.flagCount}</p>
-        <p class="text-[11px]" style="color: var(--text-muted)">Flagged</p>
-      </div>
+      <div class="shrink-0" title="Average risk score across analyzed reels">${gauge}</div>
     </div>
   </a>`;
 }

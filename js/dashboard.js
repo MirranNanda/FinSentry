@@ -2,14 +2,15 @@
 // Data now comes from Supabase (js/db.js) instead of the Phase 1 mock arrays.
 
 function renderStatTiles(influencers, joined) {
-  const analyzed = joined.filter((r) => r.analysis && r.analysis.is_financial_content);
+  const processed = joined.filter((r) => r.analysis);
+  const financial = processed.filter((r) => r.analysis.is_financial_content);
   const flagged = joined.filter((r) => r.flag !== null);
   const critical = joined.filter((r) => r.analysis && r.analysis.risk_level === "CRITICAL");
   const activeInfluencers = influencers.filter((i) => i.active).length;
 
   const tiles = [
     { label: "Watched influencers", value: influencers.length, sub: `${activeInfluencers} active`, color: "var(--series-blue)" },
-    { label: "Reels analyzed", value: analyzed.length, sub: `${joined.length} total scraped`, color: "var(--series-blue)" },
+    { label: "Confirmed financial content", value: financial.length, sub: `${processed.length} of ${joined.length} reels processed`, color: "var(--series-blue)" },
     { label: "Flagged for review", value: flagged.length, sub: `${flagged.filter((r) => !r.flag.reviewed).length} pending`, color: "var(--status-warning)" },
     { label: "Critical severity", value: critical.length, sub: "guaranteed-return / urgent language", color: "var(--status-critical)" },
   ];
@@ -17,13 +18,13 @@ function renderStatTiles(influencers, joined) {
   document.getElementById("stat-tiles").innerHTML = tiles
     .map(
       (t) => `
-    <div class="card p-4">
-      <div class="flex items-center gap-2 mb-2">
-        <span class="w-2 h-2 rounded-full" style="background:${t.color}"></span>
+    <div class="card card-glow p-5">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-2 h-2 rounded-full" style="background:${t.color}; box-shadow: 0 0 8px ${t.color}"></span>
         <p class="text-xs" style="color: var(--text-muted)">${t.label}</p>
       </div>
-      <p class="stat-tile-value text-3xl font-semibold" style="color: var(--text-primary)" data-count-to="${t.value}">0</p>
-      <p class="text-xs mt-1" style="color: var(--text-secondary)">${t.sub}</p>
+      <p class="stat-tile-value text-4xl font-bold" style="color: var(--text-primary)" data-count-to="${t.value}">0</p>
+      <p class="text-xs mt-1.5" style="color: var(--text-secondary)">${t.sub}</p>
     </div>`
     )
     .join("");

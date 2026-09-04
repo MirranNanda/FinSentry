@@ -4,92 +4,105 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FinSentry — Flagged Content</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/theme.js"></script>
 </head>
 <body class="min-h-screen">
 
-  <header class="border-b hairline sticky top-0 z-10 backdrop-blur-md" style="background: var(--surface-0-glass)">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-      <a href="index.html" class="flex items-center gap-2 shrink-0">
-        <span class="logo-mark inline-flex items-center justify-center w-8 h-8 rounded-xl" style="background: linear-gradient(135deg, var(--accent), var(--series-blue))">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="index.html" class="sidebar-logo">
+        <span class="logo-mark inline-flex items-center justify-center w-8 h-8 rounded-xl shrink-0" style="background: var(--surface-2); border: 1px solid var(--border)">
+          <span class="mono-text" style="font-size: 15px">fS</span>
         </span>
-        <span class="font-semibold text-lg font-mono-ui" style="color: var(--text-primary)">FinSentry</span>
+        <span class="font-display text-lg" style="color: var(--text-primary); font-weight: 700">Fin<span style="color: var(--text-secondary); font-weight: 600">Sentry</span></span>
       </a>
-      <nav class="nav-pill-group text-sm">
-        <a href="index.html" class="nav-pill">Dashboard</a>
-        <a href="influencers.html" class="nav-pill">Influencers</a>
-        <a href="flagged.html" class="nav-pill active">Flagged Content</a>
+      <nav class="sidebar-nav">
+        <a href="index.html" class="sidebar-link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          <span class="link-label">Dashboard</span>
+        </a>
+        <a href="influencers.html" class="sidebar-link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="link-label">Influencers</span>
+        </a>
+        <a href="flagged.html" class="sidebar-link active">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          <span class="link-label">Flagged Content</span>
+        </a>
       </nav>
-      <button id="theme-toggle" class="text-xs border rounded-full px-3 py-1.5 hairline shrink-0" style="color: var(--text-secondary)"></button>
-    </div>
-  </header>
-
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mb-6">
-      <h1 class="page-title text-2xl font-semibold gradient-text">Flagged content</h1>
-      <p class="text-sm mt-1" style="color: var(--text-secondary)">Reels with a review-priority score. Review evidence before acting.</p>
-    </div>
-
-    <div id="influencer-filter-chip" class="hidden mb-4"></div>
-
-    <!-- Controls -->
-    <div class="card p-3 mb-4 flex flex-wrap items-center gap-3">
-      <div class="relative flex-1 min-w-[220px]">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="search-input" type="text" placeholder="Search by stock, ticker, or influencer…"
-          class="pill-input w-full pl-9 pr-3 py-2 text-sm border hairline focus:outline-none"
-          style="background: var(--surface-1); color: var(--text-primary)" />
+      <div class="sidebar-footer">
+        <button id="theme-toggle" class="text-xs border rounded-full px-3 py-1.5 hairline w-full" style="color: var(--text-secondary)"></button>
       </div>
-      <select id="risk-filter" class="pill-select text-sm border hairline px-3 py-2" style="background: var(--surface-1); color: var(--text-primary)">
-        <option value="all">All risk levels</option>
-        <option value="REVIEW">Review</option>
-        <option value="HIGH">High</option>
-        <option value="CRITICAL">Critical</option>
-      </select>
-      <select id="reviewed-filter" class="pill-select text-sm border hairline px-3 py-2" style="background: var(--surface-1); color: var(--text-primary)">
-        <option value="all">All statuses</option>
-        <option value="pending">Pending review</option>
-        <option value="reviewed">Reviewed</option>
-      </select>
-      <select id="sort-select" class="pill-select text-sm border hairline px-3 py-2" style="background: var(--surface-1); color: var(--text-primary)">
-        <option value="score-desc">Sort: Risk score (high–low)</option>
-        <option value="score-asc">Sort: Risk score (low–high)</option>
-        <option value="date-desc">Sort: Posted (newest)</option>
-        <option value="date-asc">Sort: Posted (oldest)</option>
-      </select>
-    </div>
+    </aside>
 
-    <p id="result-count" class="text-xs mb-2" style="color: var(--text-muted)"></p>
+    <main class="app-main">
+      <div class="mb-6">
+        <h1 class="page-title gradient-text">Flagged content</h1>
+        <p class="text-sm mt-1" style="color: var(--text-secondary)">Reels with a review-priority score. Review evidence before acting.</p>
+      </div>
 
-    <div class="card overflow-x-auto">
-      <table class="data-table w-full text-sm">
-        <thead>
-          <tr class="text-left">
-            <th class="px-4 py-3">Influencer</th>
-            <th class="px-4 py-3">Stock</th>
-            <th class="px-4 py-3">Call</th>
-            <th class="px-4 py-3">Price target</th>
-            <th class="px-4 py-3">Risk score</th>
-            <th class="px-4 py-3">Risk level</th>
-            <th class="px-4 py-3">Status</th>
-            <th class="px-4 py-3">Posted</th>
-            <th class="px-4 py-3"></th>
-          </tr>
-        </thead>
-        <tbody id="flagged-body"></tbody>
-      </table>
-    </div>
-    <p id="empty-state" class="text-sm text-center py-10 hidden" style="color: var(--text-muted)">No flagged content matches your filters.</p>
-  </main>
+      <div id="influencer-filter-chip" class="hidden mb-4"></div>
+
+      <!-- Controls -->
+      <div class="card p-3 mb-4 flex flex-wrap items-center gap-3">
+        <div class="relative flex-1 min-w-[220px]">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="search-input" type="text" placeholder="Search by stock, ticker, or influencer…"
+            class="pill-input w-full pl-9 pr-3 py-2 text-sm border hairline focus:outline-none"
+            style="background: var(--surface-1); color: var(--text-primary)" />
+        </div>
+        <select id="risk-filter" class="pill-select text-sm border hairline px-3 py-2" style="background: var(--surface-1); color: var(--text-primary)">
+          <option value="all">All risk levels</option>
+          <option value="REVIEW">Review</option>
+          <option value="HIGH">High</option>
+          <option value="CRITICAL">Critical</option>
+        </select>
+        <select id="reviewed-filter" class="pill-select text-sm border hairline px-3 py-2" style="background: var(--surface-1); color: var(--text-primary)">
+          <option value="all">All statuses</option>
+          <option value="pending">Pending review</option>
+          <option value="reviewed">Reviewed</option>
+        </select>
+        <select id="sort-select" class="pill-select text-sm border hairline px-3 py-2" style="background: var(--surface-1); color: var(--text-primary)">
+          <option value="score-desc">Sort: Risk score (high–low)</option>
+          <option value="score-asc">Sort: Risk score (low–high)</option>
+          <option value="date-desc">Sort: Posted (newest)</option>
+          <option value="date-asc">Sort: Posted (oldest)</option>
+        </select>
+      </div>
+
+      <p id="result-count" class="text-xs mb-2" style="color: var(--text-muted)"></p>
+
+      <div class="card overflow-x-auto">
+        <table class="data-table w-full text-sm">
+          <thead>
+            <tr class="text-left">
+              <th class="px-4 py-3">Influencer</th>
+              <th class="px-4 py-3">Stock</th>
+              <th class="px-4 py-3">Call</th>
+              <th class="px-4 py-3">Price target</th>
+              <th class="px-4 py-3">Risk score</th>
+              <th class="px-4 py-3">Risk level</th>
+              <th class="px-4 py-3">Status</th>
+              <th class="px-4 py-3">Posted</th>
+              <th class="px-4 py-3"></th>
+            </tr>
+          </thead>
+          <tbody id="flagged-body"></tbody>
+        </table>
+      </div>
+      <p id="empty-state" class="text-sm text-center py-10 hidden" style="color: var(--text-muted)">No flagged content matches your filters.</p>
+    </main>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js"></script>
   <script src="js/supabaseClient.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/db.js"></script>
+  <script src="js/charts.js"></script>
   <script src="js/flagged.js"></script>
 </body>
 </html>
