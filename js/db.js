@@ -74,3 +74,18 @@ async function retryAnalysis(videoId) {
   if (error) throw error;
   return data;
 }
+
+// Live updates: calls onChange (debounced) whenever any row in the given
+// tables changes -- e.g. the background analysis pipeline finishing a
+// video, or a flag being reviewed elsewhere. Pages use this to silently
+// refresh instead of requiring a manual reload. Requires each table to be
+// added to the `supabase_realtime` publication (see README).
+function subscribeToTableChanges(tables, onChange, debounceMs = 800) {
+  const debounced = debounce(onChange, debounceMs);
+  const channel = supabaseClient.channel(`live-${tables.join("-")}`);
+  for (const table of tables) {
+    channel.on("postgres_changes", { event: "*", schema: "public", table }, debounced);
+  }
+  channel.subscribe();
+  return channel;
+}

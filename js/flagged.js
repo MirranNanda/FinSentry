@@ -98,26 +98,32 @@ function applyFlaggedView() {
   tbody.innerHTML = rows.map(flaggedRow).join("");
 }
 
-async function loadFlagged() {
+async function loadFlagged(isBackgroundRefresh = false) {
   if (!requireSupabaseConfigured()) return;
 
   const tbody = document.getElementById("flagged-body");
-  tbody.innerHTML = `<tr><td colspan="9">${loadingHTML()}</td></tr>`;
+  if (!isBackgroundRefresh) tbody.innerHTML = `<tr><td colspan="9">${loadingHTML()}</td></tr>`;
 
   try {
     allFlaggedReels = await getFlaggedReels();
-
-    document.getElementById("search-input").addEventListener("input", debounce(applyFlaggedView, 120));
-    document.getElementById("risk-filter").addEventListener("change", applyFlaggedView);
-    document.getElementById("reviewed-filter").addEventListener("change", applyFlaggedView);
-    document.getElementById("sort-select").addEventListener("change", applyFlaggedView);
-
     await renderInfluencerChip();
     applyFlaggedView();
   } catch (error) {
-    tbody.innerHTML = "";
-    document.querySelector("main").insertAdjacentHTML("afterbegin", errorHTML(error));
+    if (!isBackgroundRefresh) {
+      tbody.innerHTML = "";
+      document.querySelector("main").insertAdjacentHTML("afterbegin", errorHTML(error));
+    }
   }
 }
 
+document.getElementById("search-input").addEventListener("input", debounce(applyFlaggedView, 120));
+document.getElementById("risk-filter").addEventListener("change", applyFlaggedView);
+document.getElementById("reviewed-filter").addEventListener("change", applyFlaggedView);
+document.getElementById("sort-select").addEventListener("change", applyFlaggedView);
+
 loadFlagged();
+
+// Live updates: silently re-fetch (keeping current filters/search intact)
+// whenever the analysis pipeline writes new data, instead of requiring a
+// manual reload to see newly-flagged reels.
+subscribeToTableChanges(["videos", "analyses", "flags"], () => loadFlagged(true));

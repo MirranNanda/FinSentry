@@ -94,11 +94,11 @@ function renderRecentFlags(flaggedRows) {
     .join("") || `<tr><td colspan="5" class="py-6 text-center" style="color: var(--text-muted)">No flagged content yet.</td></tr>`;
 }
 
-async function loadDashboard() {
+async function loadDashboard(isBackgroundRefresh = false) {
   if (!requireSupabaseConfigured()) return;
 
   const statTiles = document.getElementById("stat-tiles");
-  statTiles.innerHTML = loadingHTML();
+  if (!isBackgroundRefresh) statTiles.innerHTML = loadingHTML();
 
   try {
     const [influencers, joined] = await Promise.all([getInfluencers(), getJoinedReels()]);
@@ -108,9 +108,19 @@ async function loadDashboard() {
     renderRiskByInfluencerChart(document.getElementById("risk-by-influencer-chart"), joined);
     renderReelsTimelineChart(document.getElementById("reels-timeline-chart"), joined);
   } catch (error) {
-    statTiles.innerHTML = "";
-    document.querySelector("main").insertAdjacentHTML("afterbegin", errorHTML(error));
+    if (!isBackgroundRefresh) {
+      statTiles.innerHTML = "";
+      document.querySelector("main").insertAdjacentHTML("afterbegin", errorHTML(error));
+    }
+    // A background refresh that fails (e.g. a dropped connection) just
+    // leaves the last-good render on screen rather than blanking the page.
   }
 }
 
 loadDashboard();
+
+// Live updates: the analysis pipeline (Phase 6/7) writes to `videos`,
+// `analyses`, and `flags` in the background on its own schedule -- re-fetch
+// and silently re-render whenever any of them change, instead of requiring
+// a manual reload to see newly-analyzed reels.
+subscribeToTableChanges(["videos", "analyses", "flags"], () => loadDashboard(true));
