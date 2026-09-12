@@ -226,15 +226,20 @@ async function saveNewReels(
   let skippedOverCap = 0;
   let skippedRefreshOverCap = 0;
 
-  // Genuinely-new candidates, newest posted_at first -- so a capped run
-  // (e.g. the daily 5-a-day schedule) prioritizes the most recent content
-  // rather than whatever order Apify happened to return.
-  let newCandidates = scraped.filter((reel) => !existingByUrl.has(reel.reel_url));
-  newCandidates.sort((a, b) => (b.posted_at ?? "").localeCompare(a.posted_at ?? ""));
-
-  if (typeof maxNew === "number" && newCandidates.length > maxNew) {
-    skippedOverCap = newCandidates.length - maxNew;
-    newCandidates = newCandidates.slice(0, maxNew);
+  // Genuinely-new candidates. A capped run (e.g. the daily 5-a-day
+  // schedule) should prioritize recently-posted content -- but a flat
+  // sort-by-recency across every influencer lets whichever accounts post
+  // most *often* (typically the biggest ones) fill every slot, so a
+  // smaller/less-frequent account's equally-recent Reel never gets picked.
+  // pickDiverseNewest round-robins by influencer instead: every influencer
+  // with new content contributes their single most recent Reel before any
+  // influencer contributes a second, so the daily trickle actually spans
+  // the whole watchlist, big and small alike.
+  const allNewCandidates = scraped.filter((reel) => !existingByUrl.has(reel.reel_url));
+  let newCandidates = allNewCandidates;
+  if (typeof maxNew === "number" && allNewCandidates.length > maxNew) {
+    newCandidates = pickDiverseNewest(allNewCandidates, maxNew);
+    skippedOverCap = allNewCandidates.length - newCandidates.length;
   }
 
   for (const reel of newCandidates) {
@@ -303,6 +308,36 @@ async function saveNewReels(
   ).length;
 
   return { inserted, refreshed, skippedDuplicates, skippedUnmatched, skippedOverCap, skippedRefreshOverCap };
+}
+
+// Round-robins reels across influencers (grouped by username), most-recent
+// first within each account: round 0 takes the single newest reel from
+// every influencer that has one, ordered by recency; only once everyone's
+// had a turn does round 1 start handing out anyone's second-newest. This
+// keeps a handful of highly prolific accounts from filling the whole cap
+// with their own posts before a smaller/less-frequent account gets a turn.
+function pickDiverseNewest(candidates: ScrapedReel[], cap: number): ScrapedReel[] {
+  const byInfluencer = new Map<string, ScrapedReel[]>();
+  for (const reel of candidates) {
+    const key = reel.username.toLowerCase();
+    if (!byInfluencer.has(key)) byInfluencer.set(key, []);
+    byInfluencer.get(key)!.push(reel);
+  }
+  for (const list of byInfluencer.values()) {
+    list.sort((a, b) => (b.posted_at ?? "").localeCompare(a.posted_at ?? ""));
+  }
+
+  const picked: ScrapedReel[] = [];
+  for (let round = 0; picked.length < cap; round++) {
+    const roundItems = [...byInfluencer.values()].map((list) => list[round]).filter((reel): reel is ScrapedReel => !!reel);
+    if (roundItems.length === 0) break; // no influencer has any candidates left
+    roundItems.sort((a, b) => (b.posted_at ?? "").localeCompare(a.posted_at ?? ""));
+    for (const reel of roundItems) {
+      if (picked.length >= cap) break;
+      picked.push(reel);
+    }
+  }
+  return picked;
 }
 
 function jsonResponse(body: unknown, status = 200) {
