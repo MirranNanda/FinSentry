@@ -43,6 +43,21 @@ after insert on videos
 for each row
 execute function public.trigger_analyze_video();
 
+-- Phase 7.1: scrape-reels can also *refresh* an existing row whose stored
+-- video_url has gone dead (Instagram's signed links expire; only a fresh
+-- scrape can hand back a live one for the same Reel) by updating video_url
+-- and resetting status back to 'pending'. That's an UPDATE, not an INSERT,
+-- so it needs its own trigger to actually re-queue analysis -- otherwise
+-- the refreshed row would just sit at 'pending' until the next retry-job
+-- sweep (up to 15 minutes later) instead of firing immediately.
+drop trigger if exists on_video_requeued on videos;
+
+create trigger on_video_requeued
+after update on videos
+for each row
+when (new.status = 'pending' and old.status is distinct from 'pending')
+execute function public.trigger_analyze_video();
+
 -- To check what these background calls actually did (status code, response
 -- body, errors), pg_net logs every request/response here:
 --   select * from net._http_response order by created desc limit 20;

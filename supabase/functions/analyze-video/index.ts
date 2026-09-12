@@ -118,7 +118,17 @@ Deno.serve(async (req) => {
 });
 
 async function analyzeVideoWithGemini(videoUrl: string, caption: string) {
-  const videoRes = await fetch(videoUrl);
+  // Instagram's CDN returns 403 for requests that don't look like a normal
+  // browser/app fetch (missing User-Agent/Referer), even for a video that's
+  // otherwise still valid -- this isn't bypassing any access control, just
+  // sending the same standard headers a browser would when actually playing
+  // the Reel it was given a direct link to.
+  const videoRes = await fetch(videoUrl, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+      Referer: "https://www.instagram.com/",
+    },
+  });
   if (!videoRes.ok) {
     throw new Error(`Couldn't download video from ${videoUrl} (HTTP ${videoRes.status})`);
   }

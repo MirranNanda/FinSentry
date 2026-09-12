@@ -42,6 +42,16 @@ where status = 'pending' and id in (select video_id from analyses);
 -- the API (e.g. via the RPC endpoint) -- fine for cron's direct internal
 -- call, but not for ad-hoc invocation. Call it repeatedly, ~65+ seconds
 -- apart, to accelerate clearing a backlog: select public.retry_stuck_analyses();
+--
+-- Dead-link exclusion: Instagram's video_url is a short-lived signed CDN
+-- link (observed dying within ~24h). A 'failed' row whose error is a video
+-- download failure (403/404/etc, not a Gemini API error) has a permanently
+-- dead link -- retrying it here just calls analyze-video against the exact
+-- same dead URL again, wasting one of the 4 slots this run for a call that
+-- cannot possibly succeed. Only scrape-reels re-scraping that Reel can fix
+-- it (see supabase/functions/scrape-reels's refresh logic), so this job
+-- skips those and spends its slots on things retrying can actually fix:
+-- Gemini-side failures (quota/5xx) and lost/stuck trigger calls.
 
 create extension if not exists pg_cron;
 
@@ -58,7 +68,7 @@ begin
     select id from videos
     where retry_count < 3
       and (
-        status = 'failed'
+        (status = 'failed' and status_error not ilike '%Couldn''t download video%')
         or (status in ('pending', 'processing') and created_at < now() - interval '10 minutes')
       )
     order by created_at
@@ -80,27 +90,7 @@ $$;
 select cron.unschedule('retry-stuck-analyses') where exists (select 1 from cron.job where jobname = 'retry-stuck-analyses');
 select cron.schedule('retry-stuck-analyses', '*/15 * * * *', $$select public.retry_stuck_analyses();$$);
 
--- ---- Scheduled scraper runs (INACTIVE -- read the note above) -----------
--- Every line below is commented out on purpose (a /* */ block comment
--- doesn't work here -- the '*/' inside the cron expression '0 */6 * * *'
--- would prematurely close it). To activate once your watchlist has real
--- Instagram accounts: select this whole block, remove the leading "-- " from
--- each line, paste into a new query, and run it. Adjust '0 */6 * * *'
--- (every 6 hours) to taste.
---
--- To pause it again later: select cron.unschedule('scrape-watchlist');
---
--- select cron.schedule(
---   'scrape-watchlist',
---   '0 */6 * * *',
---   $$
---   select net.http_post(
---     url := 'https://pkrhdcvjbrifbqjmxjyj.supabase.co/functions/v1/scrape-reels',
---     headers := jsonb_build_object(
---       'Content-Type', 'application/json',
---       'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrcmhkY3ZqYnJpZmJxam14anlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5NjMyMTgsImV4cCI6MjEwMjUzOTIxOH0.SM4AyFK37Un3gKj-toRFrvViVS-cUiQXaPY4wbSgqD8'
---     ),
---     body := jsonb_build_object('all', true)
---   );
---   $$
--- );
+-- ---- Scheduled scraper runs -----------------------------------------------
+-- Now active: see supabase/enable_daily_scrape.sql. It runs scrape-reels
+-- once a day, capped at 5 new Reels, entirely inside Supabase -- no
+-- dependency on this machine or any session being open.

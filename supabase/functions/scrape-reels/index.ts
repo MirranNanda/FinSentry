@@ -23,11 +23,30 @@
 //   { "all": true }                            -- scrape every ACTIVE watchlist influencer, saves new Reels
 //   { "username": "some_public_account" }      -- ad-hoc test, does not touch the database
 //
+// Optional on the watchlist modes: { "max_new": 5 } -- caps how many *new*
+// Reels get inserted this run (newest posted_at first), so a scheduled daily
+// call can add a small, predictable trickle instead of however many Apify
+// happens to return. Anything past the cap is simply not saved this run --
+// harmless, since tomorrow's run reconsiders whatever Apify still returns.
+//
+// Self-healing dead links: Instagram's video_url is a short-lived signed CDN
+// link (observed: often dead again within ~24h). If analyze-video couldn't
+// download it in time, that video is permanently stuck at status='failed' --
+// no amount of retrying the *same* URL will ever fix it. But every time this
+// scraper re-scrapes a watchlist account, Apify hands back a FRESH video_url
+// for any Reel that's still live on Instagram, including ones we already
+// have a (dead) row for. So instead of only skipping already-seen reel_urls
+// as plain duplicates, this refreshes the video_url on any existing row
+// that's currently 'failed' and re-queues it for analysis -- at zero extra
+// Apify cost, since we're scraping that account anyway. Capped separately by
+// { "max_refresh": 3 } so a run doesn't burn the whole Gemini daily quota
+// re-trying old failures instead of covering new content.
+//
 // curl example (from the project README):
 //   curl -X POST "$SUPABASE_URL/functions/v1/scrape-reels" \
 //     -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
 //     -H "Content-Type: application/json" \
-//     -d '{"all": true}'
+//     -d '{"all": true, "max_new": 5, "max_refresh": 3}'
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -65,7 +84,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "APIFY_API_TOKEN secret is not set on this function." }, 500);
   }
 
-  let body: { influencer_id?: number; username?: string; all?: boolean; days?: number };
+  let body: { influencer_id?: number; username?: string; all?: boolean; days?: number; max_new?: number; max_refresh?: number };
   try {
     body = await req.json();
   } catch {
@@ -104,14 +123,18 @@ Deno.serve(async (req) => {
     }
 
     const scraped = await runApifyScrape(targets, body.days);
-    const saved = await saveNewReels(supabase, targets, scraped);
+    const saved = await saveNewReels(supabase, targets, scraped, body.max_new, body.max_refresh);
 
     return jsonResponse({
       scraped: scraped.length,
       inserted: saved.inserted.length,
+      refreshed: saved.refreshed.length,
       skipped_duplicates: saved.skippedDuplicates,
       skipped_unmatched_username: saved.skippedUnmatched,
+      skipped_over_cap: saved.skippedOverCap,
+      skipped_refresh_over_cap: saved.skippedRefreshOverCap,
       inserted_videos: saved.inserted,
+      refreshed_videos: saved.refreshed,
     });
   } catch (error) {
     console.error(error);
@@ -173,26 +196,48 @@ async function waitForRunFinished(runId: string, maxAttempts = 60, delayMs = 300
   throw new Error("Timed out waiting for the Apify run to finish.");
 }
 
-// Matches scraped reels back to influencer_id by username, skips anything
-// whose reel_url is already in `videos` (the column also has a unique
-// constraint as a second line of defense), and inserts the rest.
-async function saveNewReels(supabase: ReturnType<typeof createClient>, targets: Target[], scraped: ScrapedReel[]) {
+// Matches scraped reels back to influencer_id by username. For each scraped
+// reel that's genuinely new, inserts it (capped by maxNew). For one we
+// already have on file, only 'failed' rows are worth touching -- refresh
+// their video_url with the fresh one Apify just returned and re-queue them
+// for analysis (capped separately by maxRefresh); anything else (complete,
+// pending, processing) is left alone as a plain duplicate.
+async function saveNewReels(
+  supabase: ReturnType<typeof createClient>,
+  targets: Target[],
+  scraped: ScrapedReel[],
+  maxNew?: number,
+  maxRefresh?: number,
+) {
   const usernameToInfluencerId = new Map(targets.map((t) => [t.username.toLowerCase(), t.influencer_id]));
 
   const candidateUrls = scraped.map((r) => r.reel_url);
-  const { data: existingRows, error: existingError } = await supabase.from("videos").select("reel_url").in("reel_url", candidateUrls);
+  const { data: existingRows, error: existingError } = await supabase
+    .from("videos")
+    .select("id, reel_url, status")
+    .in("reel_url", candidateUrls);
   if (existingError) throw existingError;
-  const existingUrls = new Set((existingRows ?? []).map((r) => r.reel_url));
+  const existingByUrl = new Map((existingRows ?? []).map((r) => [r.reel_url, r]));
 
   const inserted: unknown[] = [];
+  const refreshed: unknown[] = [];
   let skippedDuplicates = 0;
   let skippedUnmatched = 0;
+  let skippedOverCap = 0;
+  let skippedRefreshOverCap = 0;
 
-  for (const reel of scraped) {
-    if (existingUrls.has(reel.reel_url)) {
-      skippedDuplicates++;
-      continue;
-    }
+  // Genuinely-new candidates, newest posted_at first -- so a capped run
+  // (e.g. the daily 5-a-day schedule) prioritizes the most recent content
+  // rather than whatever order Apify happened to return.
+  let newCandidates = scraped.filter((reel) => !existingByUrl.has(reel.reel_url));
+  newCandidates.sort((a, b) => (b.posted_at ?? "").localeCompare(a.posted_at ?? ""));
+
+  if (typeof maxNew === "number" && newCandidates.length > maxNew) {
+    skippedOverCap = newCandidates.length - maxNew;
+    newCandidates = newCandidates.slice(0, maxNew);
+  }
+
+  for (const reel of newCandidates) {
     const influencerId = usernameToInfluencerId.get(reel.username.toLowerCase());
     if (!influencerId) {
       skippedUnmatched++; // Apify returned a reel for a username we didn't ask about (shouldn't normally happen)
@@ -222,7 +267,42 @@ async function saveNewReels(supabase: ReturnType<typeof createClient>, targets: 
     inserted.push(data);
   }
 
-  return { inserted, skippedDuplicates, skippedUnmatched };
+  // Already-seen reels whose stored link is dead -- worth refreshing since
+  // Apify just handed back a live one for the same still-published Reel.
+  let refreshCandidates = scraped.filter((reel) => existingByUrl.get(reel.reel_url)?.status === "failed");
+  refreshCandidates.sort((a, b) => (b.posted_at ?? "").localeCompare(a.posted_at ?? ""));
+
+  if (typeof maxRefresh === "number" && refreshCandidates.length > maxRefresh) {
+    skippedRefreshOverCap = refreshCandidates.length - maxRefresh;
+    refreshCandidates = refreshCandidates.slice(0, maxRefresh);
+  }
+
+  for (const reel of refreshCandidates) {
+    const existing = existingByUrl.get(reel.reel_url)!;
+    const { data, error } = await supabase
+      .from("videos")
+      .update({
+        video_url: reel.video_url,
+        thumbnail_url: reel.thumbnail_url,
+        status: "pending",
+        status_error: null,
+        retry_count: 0,
+      })
+      .eq("id", existing.id)
+      .select()
+      .maybeSingle();
+    if (error) throw error;
+    refreshed.push(data);
+  }
+
+  // Everything else already in `videos` (complete, pending, processing, or a
+  // failed row that lost out to the refresh cap) is a plain duplicate.
+  const refreshedIds = new Set(refreshCandidates.map((r) => r.reel_url));
+  skippedDuplicates += scraped.filter(
+    (r) => existingByUrl.has(r.reel_url) && !refreshedIds.has(r.reel_url),
+  ).length;
+
+  return { inserted, refreshed, skippedDuplicates, skippedUnmatched, skippedOverCap, skippedRefreshOverCap };
 }
 
 function jsonResponse(body: unknown, status = 200) {
