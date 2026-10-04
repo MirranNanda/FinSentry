@@ -16,6 +16,13 @@
 // to retry. Run that SQL file before relying on this -- it's what adds the
 // status/status_error/retry_count columns.
 //
+// Phase 7.2: there's no way to know a Reel is financial content without
+// actually watching it (that's what this call determines), so every
+// scraped Reel still gets analyzed -- but if Gemini comes back with
+// is_financial_content: false, the video row is deleted instead of kept
+// as a LOW-risk record. FinSentry only tracks financial content, so a
+// comedy/lifestyle Reel from the same influencer isn't worth retaining.
+//
 // Deploy via the Supabase Dashboard: Edge Functions -> New Function ->
 // name it "analyze-video" -> paste this file's contents -> Deploy.
 // Then add a secret: Edge Functions -> Secrets -> GEMINI_API_KEY.
@@ -101,12 +108,21 @@ Deno.serve(async (req) => {
     const analysis = await analyzeVideoWithGemini(videoUrl, caption);
 
     let savedAnalysis = null;
+    let discarded = false;
     if (videoRow) {
-      savedAnalysis = await saveAnalysis(supabase, videoRow.id, analysis);
-      await supabase.from("videos").update({ status: "complete", status_error: null }).eq("id", videoRow.id);
+      if (!analysis.is_financial_content) {
+        // Not what this tool tracks -- delete rather than keep a LOW-risk
+        // row around. No analyses row exists yet at this point, so there's
+        // nothing to cascade; the video simply disappears.
+        await supabase.from("videos").delete().eq("id", videoRow.id);
+        discarded = true;
+      } else {
+        savedAnalysis = await saveAnalysis(supabase, videoRow.id, analysis);
+        await supabase.from("videos").update({ status: "complete", status_error: null }).eq("id", videoRow.id);
+      }
     }
 
-    return jsonResponse({ analysis, saved: savedAnalysis });
+    return jsonResponse({ analysis, saved: savedAnalysis, discarded });
   } catch (error) {
     console.error(error);
     const message = error instanceof Error ? error.message : String(error);
