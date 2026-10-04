@@ -43,15 +43,19 @@ where status = 'pending' and id in (select video_id from analyses);
 -- call, but not for ad-hoc invocation. Call it repeatedly, ~65+ seconds
 -- apart, to accelerate clearing a backlog: select public.retry_stuck_analyses();
 --
--- Dead-link exclusion: Instagram's video_url is a short-lived signed CDN
+-- Dead-link handling: Instagram's video_url is a short-lived signed CDN
 -- link (observed dying within ~24h). A 'failed' row whose error is a video
 -- download failure (403/404/etc, not a Gemini API error) has a permanently
 -- dead link -- retrying it here just calls analyze-video against the exact
--- same dead URL again, wasting one of the 4 slots this run for a call that
--- cannot possibly succeed. Only scrape-reels re-scraping that Reel can fix
--- it (see supabase/functions/scrape-reels's refresh logic), so this job
--- skips those and spends its slots on things retrying can actually fix:
--- Gemini-side failures (quota/5xx) and lost/stuck trigger calls.
+-- same dead URL again, which cannot possibly succeed. Only a fresh scrape
+-- of that same Reel can fix it (scrape-reels's refresh logic hands back a
+-- live video_url if the Reel is still up and re-queues it automatically).
+-- So instead of retrying these, this job deletes them outright -- they have
+-- no analyses row (that's only written on success), so deleting is a clean
+-- no-op everywhere else in the schema. If the Reel is still live, the next
+-- scrape re-inserts it as "new" with a fresh link; if it's gone, there was
+-- never anything to recover. This keeps the dashboard's "failed" bucket
+-- meaning "actively stuck," not "permanently and silently unfixable."
 
 create extension if not exists pg_cron;
 
@@ -64,11 +68,14 @@ as $$
 declare
   v record;
 begin
+  delete from videos
+  where status = 'failed' and status_error ilike '%Couldn''t download video%';
+
   for v in
     select id from videos
     where retry_count < 3
       and (
-        (status = 'failed' and status_error not ilike '%Couldn''t download video%')
+        status = 'failed'
         or (status in ('pending', 'processing') and created_at < now() - interval '10 minutes')
       )
     order by created_at
